@@ -143,7 +143,6 @@ setInterval(function() {
   game.step();
 }, 100);
 
-
 //let game = new Game(300,300,15); // Crea un nou joc
 document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
 window.setInterval(game.step.bind(game),100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
