@@ -1,145 +1,149 @@
-/**
- * Classe que representa el joc de la serp (snake)
- * @class
- */
 class Game {
+    constructor(width, height, amount) {
+      this.width = width;
+      this.height = height;
+      this.amount = amount;
+      this.snake = [];
+      this.direction = "right";
+      this.food = [];
+      this.score = 0;
+    }
+  
+    initCanvas(width, height) {
+      this.canvas = document.createElement("canvas");
+      this.canvas.width = width;
+      this.canvas.height = height;
+      this.context = this.canvas.getContext("2d");
+      document.body.appendChild(this.canvas);
+      return this;
+    }
+  
+    start() {
+      for (let i = this.amount / 2; i < this.amount / 2 + 3; i++) {
+        this.snake.push({ x: i, y: this.amount / 2 });
+      }
+      this.addFood();
+      this.step();
+    }
+  
+    drawSquare(x, y, color) {
+      this.context.fillStyle = color;
+      this.context.fillRect(
+        x * this.width / this.amount,
+        y * this.height / this.amount,
+        this.width / this.amount,
+        this.height / this.amount
+      );
+    }
+  
+    drawSnake() {
+      this.snake.forEach(part => {
+        this.drawSquare(part.x, part.y, "black");
+      });
+    }
+  
+    clear() {
+      this.context.clearRect(0, 0, this.width, this.height);
+    }
+  
+    drawFood() {
+      this.food.forEach(part => {
+        this.drawSquare(part.x, part.y, "red");
+      });
+    }
+  
+    collides(x, y) {
+      return this.snake.some(part => part.x === x && part.y === y);
+    }
+  
+    addFood() {
+      let x = Math.floor(Math.random() * this.amount);
+      let y = Math.floor(Math.random() * this.amount);
+      while (this.collides(x, y)) {
+        x = Math.floor(Math.random() * this.amount);
+        y = Math.floor(Math.random() * this.amount);
+      }
+      this.food.push({ x, y });
+    }
+  
+    newTile() {
+      let newX = this.snake[0].x + (this.direction === "right" ? 1 : this.direction === "left" ? -1 : 0);
+      let newY = this.snake[0].y + (this.direction === "down" ? 1 : this.direction === "up" ? -1 : 0);
+      if (newX >= this.amount) {
+        newX = 0;
+      }
+      if (newX < 0) {
+        newX = this.amount - 1;
+      }
+      if (newY >= this.amount) {
+        newY = 0;
+      }
+      if (newY < 0) {
+        newY = this.amount - 1;
+      }
+      return [newX, newY];
+    }
+  
+    step() {
+        let newTile = this.newTile();
+        if (this.collides(newTile[0], newTile[1])) {
+          // Game over logic
+          return;
+        }
+      
+        this.snake.unshift(newTile);
+        this.snake.pop();
+      
+        if (newTile[0] === this.food[0] && newTile[1] === this.food[1]) {
+          this.addFood();
+        } else {
+          this.clear();
+        }
+      
+        this.drawFood();
+        this.drawSnake();
+      };
 
-	/**
-	 * Inicialitza els paràmetres del joc i crea el canvas
-	 * @constructor
-	 * @param {number} width -  width del canvas
-	 * @param {number} height -  height del canvas
-	 * @param {number} amount -  nombre de quadrats per fila de la quadrícula
-	 */
-	constructor(width,height,amount) {
-		this.width = width;
-		this.height = height;
-		this.amount = amount;
+      input(e){
+        switch (e.keyCode) {
+            case 37:
+              if (this.direction !== "right") {
+                this.direction = "left";
+              }
+              break;
+            case 38:
+              if (this.direction !== "down") {
+                this.direction = "up";
+              }
+              break;
+            case 39:
+              if (this.direction !== "left") {
+                this.direction = "right";
+              }
+              break;
+            case 40:
+              if (this.direction !== "up") {
+                this.direction = "down";
+              }
+              break;
+          }
+      }
+      
+      
+    }
+const game = new Game(500, 500, 20);
+game.initCanvas(500, 500);
+game.start();
 
-	}
+document.addEventListener("keydown", function(e) {
+  game.input(e);
+});
 
-	/**
-	 * Crea un canvas i es guarda el [context](https://developer.mozilla.org/es/docs/Web/API/CanvasRenderingContext2D) a un atribut per poder
-	 * accedir-hi des dels mètodes de pintar al canvas (com ara drawSquare, clear)
-	 * @param {number} width -  width del canvas
-	 * @param {number} height -  height del canvas
-	 */
-	initCanvas(width, height) {
-		var canvas = document.getElementById('micanvas');
-		var ctx = canvas.getContext('2d');
-	}
+setInterval(function() {
+  game.step();
+}, 100);
 
-	/**
-	 * Inicialitza els paràmetres del joc:
-	 * Serp al centre, direcció cap a la dreta, puntuació 0
-	 */
-	start() {
-		let direccion = [0,1];
-		let puntuacio = 0;
-		let serpPos = [[5,5]]
-	}
-	/**
-	 * Dibuixa un quadrat de la mida de la quadrícula (passada al constructor) al canvas
-	 * @param {number} x -  posició x de la quadrícula (no del canvas)
-	 * @param {number} y -  posició y de la quadrícula (no del canvas)
-	 * @param {string} color -  color del quadrat
-	 */
-	drawSquare(x,y,color) {
-		ctx.fillStyle = color;
-		ctx.fillRect(x,y, width, height);
-	}
 
-	/**
-	 * Neteja el canvas (pinta'l de blanc)
-	 */
-	clear() {
-		ctx.fillStyle = "rgb(255, 255, 255)";
-		ctx.fillRect(x,y, width, height);
-	}
-
-	/**
-	 * Dibuixa la serp al canvas
-	 */
-	drawSnake() {
-		ctx.rect(5,5, 2 ,2)
-		ctx.stroke();
-	}
-
-	/**
-	 * Dibuixa la poma al canvas
-	 */
-	drawFood() {
-		ctx.fillStyle = "#FF0000";
-		ctx.rect(pomaX, pomaY, 1 ,1)
-		ctx.stroke();
-	}
-
-	/**
-	 * La serp xoca amb la posició donada?
-	 * @param {number} x -  posició x a comprovar
-	 * @param {number} y -  posició y a comprovar
-	 * @return {boolean} - xoca o no
-	 */
-	collides(x,y) {
-		if ((x == width) || (y == height)){
-			return true;
-		}	
-		else
-			return false;
-	}
-
-	/**
-	 * Afegeix un menjar a una posició aleatòria, la posició no ha de ser cap de les de la serp
-	 */
-	addFood() {
-		do{
-			let pomaX = Math.floor(Math.random() * (width +1));
-			let pomaY = Math.floor(Math.random() * (height +1))
-			let pomaPos = [pomaX, pomaY]
-		} while (pomaPos == serpPos);
-		
-		
-	}
-
-	/**
-	 * Calcula una nova posició a partir de la ubicació de la serp
-	 * @return {Array} - nova posició
-	 */
-	newTile() {
-		serpPos = [serpPos[0[0]] + direccion[0[0]], serpPos[1[1]] + direccion[1[1]]];
-		if (serpPos == pomaPos){
-		}
-		else if (direccion == [0,1]){
-
-		}
-		else if (direccion == [0,-1]){
-			
-		}
-		else if (direccion == [1,0]){
-			
-		}
-		else if (direccion == [-1,0]){
-			
-		}
-
-	}
-
-	/**
-	 * Calcula el nou estat del joc, nova posició de la serp, nou menjar si n'hi ha ...
-	 * i ho dibuixa al canvas
-	 */
-	step() {
-		
-	}
-
-	/**
-	 * Actualitza la direcció de la serp a partir de l'event (tecla dreta, esquerra, amunt, avall)
-	 * @param {event} e - l'event de la tecla premuda
-	 */
-	input(e) {
-	}
-}
-
-let game = new Game(300,300,15); // Crea un nou joc
+//let game = new Game(300,300,15); // Crea un nou joc
 document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
 window.setInterval(game.step.bind(game),100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
