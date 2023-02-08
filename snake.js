@@ -1,129 +1,144 @@
-class Game {
-    constructor(width, height, amount) {
-      this.width = width;
-      this.height = height;
+class Juego{
+
+    constructor(ancho, alto, amount) {
+      this.ancho = ancho;
+      this.alto = alto;
       this.amount = amount;
-      this.snake = [];
-      this.direction = "right";
-      this.food = [];
-      this.score = 0;
+      this.serp = [];
+      this.direccion = "right";
+      this.Menjar = [];
+      this.puntuacion = 0;
+
     }
   
-    initCanvas(width, height) {
+
+    initCanvas(ancho, alto){
       this.canvas = document.createElement("canvas");
-      this.canvas.width = width;
-      this.canvas.height = height;
+      this.canvas.width = ancho;
+      this.canvas.height = alto;
       this.context = this.canvas.getContext("2d");
       document.body.appendChild(this.canvas);
+
       return this;
     }
   
     start() {
-      for (let i = this.amount / 2; i < this.amount / 2 + 3; i++) {
-        this.snake.push({ x: i, y: this.amount / 2 });
+      for (let a = this.amount / 2; a < this.amount / 2 + 3; a++) {
+          this.serp.push({ x: a, y: this.amount / 2 });
       }
-      this.addFood();
+
+      this.addMenjar();
       this.step();
+      this.initCanvas(200, 100);
     }
   
     drawSquare(x, y, color) {
       this.context.fillStyle = color;
       this.context.fillRect(
-        x * this.width / this.amount,
-        y * this.height / this.amount,
-        this.width / this.amount,
-        this.height / this.amount
+        x * this.ancho / this.amount,
+        y * this.alto / this.amount,
+        this.ancho / this.amount,
+        this.alto / this.amount
       );
     }
   
-    drawSnake() {
-      this.snake.forEach(part => {
+    drawserp() {
+      this.serp.forEach(part => {
         this.drawSquare(part.x, part.y, "black");
       });
     }
   
     clear() {
-      this.context.clearRect(0, 0, this.width, this.height);
+      this.context.clearRect(0, 0, this.ancho, this.alto);
     }
   
-    drawFood() {
-      this.food.forEach(part => {
+    drawMenjar() {
+      this.Menjar.forEach(part => {
         this.drawSquare(part.x, part.y, "red");
       });
     }
   
     collides(x, y) {
-      return this.snake.some(part => part.x === x && part.y === y);
+      return this.serp.some(part => part.x === x && part.y === y);
     }
   
-    addFood() {
+    addMenjar() {
       let x = Math.floor(Math.random() * this.amount);
       let y = Math.floor(Math.random() * this.amount);
+      
+      
       while (this.collides(x, y)) {
         x = Math.floor(Math.random() * this.amount);
         y = Math.floor(Math.random() * this.amount);
       }
-      this.food.push({ x, y });
+      this.Menjar.push({ x, y });
     }
   
-    newTile() {
-      let newX = this.snake[0].x + (this.direction === "right" ? 1 : this.direction === "left" ? -1 : 0);
-      let newY = this.snake[0].y + (this.direction === "down" ? 1 : this.direction === "up" ? -1 : 0);
-      if (newX >= this.amount) {
-        newX = 0;
-      }
-      if (newX < 0) {
-        newX = this.amount - 1;
-      }
-      if (newY >= this.amount) {
-        newY = 0;
-      }
-      if (newY < 0) {
-        newY = this.amount - 1;
-      }
-      return [newX, newY];
+    nuevoTile() {
+      let nuevoX = this.serp[0].x + (this.direccion === "right" ? 1 : this.direccion === "left" ? -1 : 0);
+      let nuevoY = this.serp[0].y + (this.direccion === "down" ? 1 : this.direccion === "up" ? -1 : 0);
+        
+      if (nuevoX >= this.amount) {
+          nuevoX = 0;
+        }
+        if (nuevoX < 0) {
+          nuevoX = this.amount - 1;
+        }
+        if (nuevoY >= this.amount) {
+          nuevoY = 0;
+        }
+        if (nuevoY < 0) {
+          nuevoY = this.amount - 1;
+        }
+        
+        return [nuevoX, nuevoY];
     }
   
     step() {
-        let newTile = this.newTile();
-        if (this.collides(newTile[0], newTile[1])) {
-          // Game over logic
+        let nuevoTile = this.nuevoTile();
+        if (this.collides(nuevoTile[0], nuevoTile[1])) {
           return;
-        }
+          }
+        
+
+        this.serp.unshift(nuevoTile);
+        this.serp.pop();
       
-        this.snake.unshift(newTile);
-        this.snake.pop();
+          if (nuevoTile[0] === this.Menjar[0] && nuevoTile[1] === this.Menjar[1]) {
+            this.addMenjar();
+          } 
+          else {
+            this.clear();
+          }
       
-        if (newTile[0] === this.food[0] && newTile[1] === this.food[1]) {
-          this.addFood();
-        } else {
-          this.clear();
-        }
-      
-        this.drawFood();
-        this.drawSnake();
+        this.drawMenjar();
+        this.drawserp();
       };
 
       input(e){
         switch (e.keyCode) {
+
             case 37:
-              if (this.direction !== "right") {
-                this.direction = "left";
+              if (this.direccion !== "right") {
+                this.direccion = "left";
               }
               break;
+
             case 38:
-              if (this.direction !== "down") {
-                this.direction = "up";
+              if (this.direccion !== "down") {
+                this.direccion = "up";
               }
               break;
+
             case 39:
-              if (this.direction !== "left") {
-                this.direction = "right";
+              if (this.direccion !== "left") {
+                this.direccion = "right";
               }
               break;
+
             case 40:
-              if (this.direction !== "up") {
-                this.direction = "down";
+              if (this.direccion !== "up") {
+                this.direccion = "down";
               }
               break;
           }
@@ -131,18 +146,20 @@ class Game {
       
       
     }
-const game = new Game(500, 500, 20);
-game.initCanvas(500, 500);
-game.start();
+
+
+const juego1 = new Juego(500, 500, 20);
+juego1.initCanvas(500, 500);
+juego1.start();
 
 document.addEventListener("keydown", function(e) {
-  game.input(e);
+  juego1.input(e);
 });
 
 setInterval(function() {
-  game.step();
+  juego1.step();
 }, 100);
 
 //let game = new Game(300,300,15); // Crea un nou joc
-document.onkeydown = game.input.bind(game); // Assigna l'event de les tecles a la funció input del nostre joc
-window.setInterval(game.step.bind(game),100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
+document.onkeydown = juego1.input.bind(juego1); // Assigna l'event de les tecles a la funció input del nostre joc
+window.setInterval(juego1.step.bind(juego1),100); // Fes que la funció que actualitza el nostre joc s'executi cada 100ms
